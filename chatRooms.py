@@ -69,7 +69,9 @@ def gui_entrar():
     # Ejemplo de agregar elementos dinámicamente
     for i in range(10):
         label = QLabel(f"User {i}")
+        button = QPushButton(f"Request to {i}")
         layout.addWidget(label)
+        layout.addWidget(button)
 
     ##  Area 2 (Current chatrooms)
     scroll_area_2 = mainWindow.scrollArea_2
@@ -81,7 +83,10 @@ def gui_entrar():
     # Ejemplo de agregar elementos dinámicamente
     for i in range(10):
         label = QLabel(f"Chat Room {i}")
+        button = QPushButton(f"Belong to {i}")
         layout.addWidget(label)
+        layout.addWidget(button)
+
 
     ##
 

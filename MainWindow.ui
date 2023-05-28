@@ -161,7 +161,7 @@
        <height>99</height>
       </rect>
      </property>
-     <widget class="QWidget" name="formLayoutWidget">
+     <widget class="QWidget" name="gridLayoutWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -170,7 +170,7 @@
         <height>80</height>
        </rect>
       </property>
-      <layout class="QFormLayout" name="formLayout"/>
+      <layout class="QGridLayout" name="gridLayout"/>
      </widget>
     </widget>
    </widget>
@@ -179,7 +179,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>230</y>
+     <y>240</y>
      <width>201</width>
      <height>131</height>
     </rect>
@@ -226,7 +226,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>380</y>
+     <y>400</y>
      <width>121</width>
      <height>24</height>
     </rect>
