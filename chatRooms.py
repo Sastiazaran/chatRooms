@@ -35,6 +35,7 @@ mainWindow = uic.loadUi("MainWindow.ui")
 errorWindow = uic.loadUi("error.ui")
 createChatRoom = uic.loadUi("createChatRoom.ui")
 mainWindowAdmin = uic.loadUi("MainWindowAdmin.ui")
+registerWindow = uic.loadUi("Register.ui")
 
 username = ""
 
@@ -84,6 +85,7 @@ def getAdminChats():
 
 def gui_login():
     global username
+    registerWindow.hide()
     username = loginWindow.lineEdit.text()
     password = loginWindow.lineEdit_2.text()
 
@@ -320,10 +322,39 @@ def CreateChatRoom():
 def close():
     app.exit()
    
+def register_user():
+    global username
+    loginWindow.hide()
+    registerWindow.show()
+    username = loginWindow.lineEdit.text()
+    password = loginWindow.lineEdit_2.text()
+
+    print("username: " + username + " password: " + password)
+
+    msg = "registrarUsuario|"
+    msg = msg + username + "|" + password + "\0"
+    msg = utilities.cifrar(msg)
+
+    print("Enviando: %s " % (msg))
+    s.send(msg.encode())
+
+    data = s.recv(1024)
+    data = utilities.cifrar(data.decode())
+    print(data)
+
+    if len(username) == 0 or len(password) == 0:
+        loginWindow.label_5.setText("Please enter data on all fields")
+    else:
+        gui_login()
+
+def register_to_login():
+    registerWindow.hide()
+    loginWindow.show()
 #   Funcionalidad botones
 
 loginWindow.pushButton.clicked.connect(gui_login)
 loginWindow.pushButton_2.clicked.connect(close)
+loginWindow.pushButton_3.clicked.connect(register_user)
 mainWindow.button_createChatRoom.clicked.connect(mainWindow_to_createChatRoom)
 mainWindow.button_logOut.clicked.connect(return_to_login)
 mainWindow.button_send.clicked.connect(send_message)
@@ -333,7 +364,10 @@ createChatRoom.button_createButton.clicked.connect(CreateChatRoom)
 mainWindow.button_Admin.clicked.connect(adminView)
 mainWindowAdmin.button_createChatRoom.clicked.connect(mainWindow_to_createChatRoom)
 mainWindowAdmin.button_logOut.clicked.connect(return_to_login)
-mainWindow.button_send.clicked.connect(send_message)    
+mainWindow.button_send.clicked.connect(send_message)
+registerWindow.pushButton_3.clicked.connect(register_user)
+registerWindow.pushButton.clicked.connect(register_to_login)
+registerWindow.pushButton_2.clicked.connect(close)
 
 
 
