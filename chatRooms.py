@@ -23,7 +23,7 @@ userChatrooms = []
 allChatrooms = []
 getAdminChat = []
 labelList = []
-buttonList = []
+userButtonList = []
 button1List = []
 button2List = []
 getChat = ""
@@ -38,6 +38,7 @@ mainWindowAdmin = uic.loadUi("MainWindowAdmin.ui")
 registerWindow = uic.loadUi("Register.ui")
 
 username = ""
+flag = True
 
 def getDataUsers():
     global users
@@ -51,14 +52,15 @@ def getDataUsers():
     users = userData.split("|")
 
 def getUserChatRoooms():
-    global userChatrooms
+    global userChatrooms, username
     #   Get User ChatRooms
-    msgUserChatrooms = "getUserChatrooms|"
+    msgUserChatrooms = "getUserChatrooms|" + username + "\0"
     msgUserChatrooms = utilities.cifrar(msgUserChatrooms)
     s.send(msgUserChatrooms.encode())
     
     userChatroomsData = s.recv(1024)
     userChatroomsData = utilities.cifrar(userChatroomsData.decode())
+    #print(userChatroomsData)
     userChatrooms = userChatroomsData.split("|")
     
 def getAllChatRooms():
@@ -110,7 +112,7 @@ def gui_login():
         gui_entrar()
 
 def gui_entrar():
-    global username, getChat
+    global username, getChat, flag
     loginWindow.hide()
     mainWindow.show()
 
@@ -125,9 +127,11 @@ def gui_entrar():
     layout = QVBoxLayout(scroll_content_widget)
 
     # Ejemplo de agregar elementos dinámicamente
-    getDataUsers()
-    #getUserChatRoooms()
-    getAllChatRooms()
+    if(flag):
+        getDataUsers()
+        getAllChatRooms()
+        getUserChatRoooms()
+        flag = False
     for i in users:
         label = QLabel(f"User {i}")
         layout.addWidget(label)
@@ -142,11 +146,15 @@ def gui_entrar():
     # Ejemplo de agregar elementos dinámicamente
     
     for i in userChatrooms:
+        appe = i
         label = QLabel(f"Chat Room {i}")
-        button = QPushButton(f"Join {i}")
+        button = QPushButton(f"Open {i}")
         layout.addWidget(label)
+        userButtonList.append([button,appe])        
         layout.addWidget(button)   
 
+    for x in userButtonList:
+        x[0].clicked.connect(lambda: write_to_msgBrowser(x[1]))
     ##  Area 3 (Current chatrooms)
     scroll_area_3 = mainWindow.scrollArea_3
     scroll_content_widget_3 = mainWindow.scrollAreaWidgetContents_3
@@ -161,36 +169,43 @@ def gui_entrar():
         layout.addWidget(label)
         layout.addWidget(button)    
 
+
     ##  
 
-def write_to_msgBrowser():
+def write_to_msgBrowser(chat):
     global getChat
-    msggetChat = "getChat|"
+    msggetChat = "getChat|" + chat + "\0"
     msggetChat = utilities.cifrar(msggetChat)
     s.send(msggetChat.encode())
 
     getChats = s.recv(1024)
     getChats = utilities.cifrar(getChats.decode())
-    getChat = getChats.split("|")
-    print(getChat)
-    mainWindow.msgEdit.append(getChat)
+    getChat = chat
+    #getChat = getChats.split("|")
+    #mainWindow.label_chat.setText(chat)
+    mainWindow.label_2.setText(getChats)
+    print("res: "+getChats)
+    #mainWindow.msgEdit.append(getChat)
     #gui_entrar()
 
 def send_message():
     global username, getChat
     msgSend = mainWindow.lineEdit.text()
-    msgSend = "messageSent|"  + username + '->' + msgSend + '|' + getChat
+    #mainWindow.lineEdit.set_text("")
+    msgSend = "messageSent|"  + username + '->' + msgSend + '|' + getChat + "\0"
     msgSend = utilities.cifrar(msgSend)
-    print("Enviando: %s" + msgSend)
+    #print("Enviando: %s" + msgSend)
     s.send(msgSend.encode())
 
     getMsgSent = s.recv(1024)
     getMsgSent = utilities.cifrar(getMsgSent.decode())
-    getChat = getMsgSent.split("|")
-    mainWindow.label_2.setText(getChat)
+    #print("Es:"+ getChat)
+    #getChat = getMsgSent.split("|")
+
+    write_to_msgBrowser(getChat)
     
     # write_to_msgBrowser()
-    mainWindow.hide()
+    #mainWindow.hide()
     #gui_entrar()
 
 def adminView():
@@ -318,6 +333,7 @@ def CreateChatRoom():
         createChatRoom.creationMessage_2.setText("Please enter data on field")
     else:
         createChatRoom.creationMessage.setText("Chat room " + chatRoomName + " created successfuly!!")
+        gui_entrar()
 
 def close():
     app.exit()
@@ -364,10 +380,11 @@ createChatRoom.button_createButton.clicked.connect(CreateChatRoom)
 mainWindow.button_Admin.clicked.connect(adminView)
 mainWindowAdmin.button_createChatRoom.clicked.connect(mainWindow_to_createChatRoom)
 mainWindowAdmin.button_logOut.clicked.connect(return_to_login)
-mainWindow.button_send.clicked.connect(send_message)
+#mainWindow.button_send.clicked.connect(send_message)
 registerWindow.pushButton_3.clicked.connect(register_user)
 registerWindow.pushButton.clicked.connect(register_to_login)
 registerWindow.pushButton_2.clicked.connect(close)
+
 
 
 

@@ -115,13 +115,13 @@ int main(){
 		}
 
 		/*IMPRIME EL MENSAJE A DESCIFRAR*/
-		printf("%s", dir);
 		cypher(dir);
+		printf("Deciphered: %s\n", dir);
 
 	/* leyendo el directorio */
 		//num_vocales(dir);
 		int eventInt = event(dir);
-		printf("\nEvent:%d",eventInt);
+		printf("\nEvent:%d\n",eventInt);
 		switch(eventInt){
 			case 1:
 				auth(dir);
@@ -161,7 +161,7 @@ int main(){
 				registerUser(dir);
 				break;
 		}
-
+		printf("Sending...: %s\n", dir);
 		/* Encriptación mensaje */
 		cypher(dir);
 		

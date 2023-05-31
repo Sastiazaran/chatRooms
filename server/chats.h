@@ -114,8 +114,9 @@ void getuserchats(dir) char *dir;
                 while ((read = getline(&line, &len, fp)) != -1)
                 {
                     line[strlen(line)] = '\0';
-                    result = strcmp(dir, line);
-                    if (result == 0)
+                    char *part = strstr(line,dir);
+                    //result = strcmp(dir, line);
+                    if (part)
                     {
                         strcat(ret, strremove(direc, ".users"));
                         strcat(ret, "|");
