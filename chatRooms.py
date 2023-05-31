@@ -13,14 +13,20 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 5000  # The port used by the server
 
 #lists
 
 users = []
-chatrooms = []
+userChatrooms = []
+allChatrooms = []
+getAdminChat = []
+labelList = []
+buttonList = []
+button1List = []
+button2List = []
+getChat = ""
 
 app = QtWidgets.QApplication([])
 
@@ -28,8 +34,53 @@ loginWindow = uic.loadUi("Login.ui")
 mainWindow = uic.loadUi("MainWindow.ui")
 errorWindow = uic.loadUi("error.ui")
 createChatRoom = uic.loadUi("createChatRoom.ui")
+mainWindowAdmin = uic.loadUi("MainWindowAdmin.ui")
 
 username = ""
+
+def getDataUsers():
+    global users
+    #   Get Users
+    msgUser = "getUsers|"
+    msgUser = utilities.cifrar(msgUser)
+    s.send(msgUser.encode())
+    
+    userData = s.recv(1024)
+    userData = utilities.cifrar(userData.decode())
+    users = userData.split("|")
+
+def getUserChatRoooms():
+    global userChatrooms
+    #   Get User ChatRooms
+    msgUserChatrooms = "getUserChatrooms|"
+    msgUserChatrooms = utilities.cifrar(msgUserChatrooms)
+    s.send(msgUserChatrooms.encode())
+    
+    userChatroomsData = s.recv(1024)
+    userChatroomsData = utilities.cifrar(userChatroomsData.decode())
+    userChatrooms = userChatroomsData.split("|")
+    
+def getAllChatRooms():
+    global allChatrooms
+     #   Get All ChatRooms
+    msgAllChatrooms = "getAllChatrooms|"
+    msgAllChatrooms = utilities.cifrar(msgAllChatrooms)
+    s.send(msgAllChatrooms.encode())
+    
+    allChatroomsData = s.recv(1024)
+    allChatroomsData = utilities.cifrar(allChatroomsData.decode())
+    allChatrooms = allChatroomsData.split("|")
+
+def getAdminChats():
+    global getAdminChat
+    #   Get AdminChat
+    msgGetAdminChat = "getAdminChat|"
+    msgGetAdminChat = utilities.cifrar(msgGetAdminChat)
+    s.send(msgGetAdminChat.encode())
+    
+    getAdminChatData = s.recv(1024)
+    getAdminChatData = utilities.cifrar(getAdminChatData.decode())
+    getAdminChat = getAdminChatData.split("|")
 
 def gui_login():
     global username
@@ -57,7 +108,7 @@ def gui_login():
         gui_entrar()
 
 def gui_entrar():
-    global username
+    global username, getChat
     loginWindow.hide()
     mainWindow.show()
 
@@ -72,11 +123,13 @@ def gui_entrar():
     layout = QVBoxLayout(scroll_content_widget)
 
     # Ejemplo de agregar elementos dinámicamente
-    for i in range(10):
+    getDataUsers()
+    #getUserChatRoooms()
+    getAllChatRooms()
+    for i in users:
         label = QLabel(f"User {i}")
         layout.addWidget(label)
         
-
     ##  Area 2 (Current chatrooms)
     scroll_area_2 = mainWindow.scrollArea_2
     scroll_content_widget_2 = mainWindow.scrollAreaWidgetContents_2
@@ -85,12 +138,12 @@ def gui_entrar():
     layout = QVBoxLayout(scroll_content_widget_2)
 
     # Ejemplo de agregar elementos dinámicamente
-    for i in range(10):
+    
+    for i in userChatrooms:
         label = QLabel(f"Chat Room {i}")
         button = QPushButton(f"Join {i}")
         layout.addWidget(label)
-        layout.addWidget(button)
-
+        layout.addWidget(button)   
 
     ##  Area 3 (Current chatrooms)
     scroll_area_3 = mainWindow.scrollArea_3
@@ -100,20 +153,138 @@ def gui_entrar():
     layout = QVBoxLayout(scroll_content_widget_3)
 
     # Ejemplo de agregar elementos dinámicamente
-    for i in range(10):
+    for i in allChatrooms:
         label = QLabel(f"Chat Room {i}")
         button = QPushButton(f"Join to {i}")
+        layout.addWidget(label)
+        layout.addWidget(button)    
+
+    ##  
+
+def write_to_msgBrowser():
+    global getChat
+    msggetChat = "getChat|"
+    msggetChat = utilities.cifrar(msggetChat)
+    s.send(msggetChat.encode())
+
+    getChats = s.recv(1024)
+    getChats = utilities.cifrar(getChats.decode())
+    getChat = getChats.split("|")
+    print(getChat)
+    mainWindow.msgEdit.append(getChat)
+    #gui_entrar()
+
+def send_message():
+    global username, getChat
+    msgSend = mainWindow.lineEdit.text()
+    msgSend = "messageSent|"  + username + '->' + msgSend + '|' + getChat
+    msgSend = utilities.cifrar(msgSend)
+    print("Enviando: %s" + msgSend)
+    s.send(msgSend.encode())
+
+    getMsgSent = s.recv(1024)
+    getMsgSent = utilities.cifrar(getMsgSent.decode())
+    getChat = getMsgSent.split("|")
+    mainWindow.label_2.setText(getChat)
+    
+    # write_to_msgBrowser()
+    mainWindow.hide()
+    #gui_entrar()
+
+def adminView():
+    global username, users, userChatrooms, allChatrooms, label, button, button1, button2, getAdminChat
+    mainWindow.hide()
+    mainWindowAdmin.show()
+
+    mainWindowAdmin.label_Nickname.setText("Welcome admin " + username + " !")
+
+    ##  Area 1 (Users)
+    # Acceder al área de desplazamiento y al widget contenedor
+    scroll_area = mainWindowAdmin.scrollArea
+    scroll_content_widget = mainWindowAdmin.scrollAreaWidgetContents
+
+    # Crear un layout vertical para el widget contenedor
+    layout = QVBoxLayout(scroll_content_widget)
+    getDataUsers()
+    getUserChatRoooms()
+    getAllChatRooms()
+    getAdminChats()
+    # Ejemplo de agregar elementos dinámicamente
+    for i in users:
+        label = QLabel(f"User {i}")
+        layout.addWidget(label)
+        
+
+    ##  Area 2 (Current chatrooms)
+    scroll_area_2 = mainWindowAdmin.scrollArea_2
+    scroll_content_widget_2 = mainWindowAdmin.scrollAreaWidgetContents_2
+
+    # Crear un layout vertical para el widget contenedor
+    layout = QVBoxLayout(scroll_content_widget_2)
+
+
+    # Ejemplo de agregar elementos dinámicamente
+    for i in userChatrooms:
+        label = QLabel(f"Chat Room {i}")
+        button = QPushButton(f"Join {i}")
+        layout.addWidget(label)
+        layout.addWidget(button)
+
+
+    ##  Area 3 (Current chatrooms)
+    scroll_area_3 = mainWindowAdmin.scrollArea_3
+    scroll_content_widget_3 = mainWindowAdmin.scrollAreaWidgetContents_3
+
+    # Crear un layout vertical para el widget contenedor
+    layout = QVBoxLayout(scroll_content_widget_3)
+
+    # Ejemplo de agregar elementos dinámicamente
+    for i in allChatrooms:
+        label = QLabel(f"Chat Room {i}")
+        button = QPushButton(f"Join to {i}")
+        
         layout.addWidget(label)
         layout.addWidget(button)
 
     ##
 
+    ##  Area 3 (Current chatrooms)
+    scroll_area_4 = mainWindowAdmin.scrollArea_4
+    scroll_content_widget_4 = mainWindowAdmin.scrollAreaWidgetContents_4
+
+    # Crear un layout vertical para el widget contenedor
+    layout = QVBoxLayout(scroll_content_widget_4)
+
+    # Ejemplo de agregar elementos dinámicamente
+    for i in getAdminChat:
+        labeladmin = QLabel(f"User {i}")
+        add = QPushButton(f"add {i}")
+        kick = QPushButton(f"delete {i}") 
+        layout.addWidget(labeladmin)
+        layout.addWidget(add)
+        layout.addWidget(kick)
+
+    #   add
+
+    msgAdd = "addUser|" + username + '|' + labeladmin
+    msgAdd = utilities.cifrar(msgAdd)
+    print("Add %s " % (msgAdd))
+    s.send(msgAdd.encode())
+
+    #   delete
+
+    msgDelete = "deleteUser|" + username + '|' + labeladmin
+    msgDelete = utilities.cifrar(msgDelete)
+    print("Add %s " % (msgDelete))
+    s.send(msgAdd.encode())
+    
 def gui_error():
     loginWindow.hide()
     errorWindow.show()
 
 def return_to_login():
     mainWindow.hide()
+    mainWindowAdmin.hide()
     loginWindow.show()
 
 def return_to_login_from_error():
@@ -122,15 +293,29 @@ def return_to_login_from_error():
 
 def createChatRoom_to_mainWindow():
     createChatRoom.hide()
+    mainWindowAdmin.hide()
     mainWindow.show()
 
 def mainWindow_to_createChatRoom():
     mainWindow.hide()
+    mainWindowAdmin.hide()
     createChatRoom.show()
 
 def CreateChatRoom():
+    global username
     chatRoomName = createChatRoom.lineEdit.text()
-    createChatRoom.creationMessage.setText("Chat room " + chatRoomName + " created successfuly!!")
+
+    msgChatRoomName = "createChatRoom|"
+    msgChatRoomName =  msgChatRoomName + username + '|' + chatRoomName + '\0'
+    
+    msgChatRoomName = utilities.cifrar(msgChatRoomName)
+    print("Enviando: %s " % (msgChatRoomName))
+    s.send(msgChatRoomName.encode())
+
+    if len(chatRoomName) == 0:
+        createChatRoom.creationMessage_2.setText("Please enter data on field")
+    else:
+        createChatRoom.creationMessage.setText("Chat room " + chatRoomName + " created successfuly!!")
 
 def close():
     app.exit()
@@ -141,9 +326,16 @@ loginWindow.pushButton.clicked.connect(gui_login)
 loginWindow.pushButton_2.clicked.connect(close)
 mainWindow.button_createChatRoom.clicked.connect(mainWindow_to_createChatRoom)
 mainWindow.button_logOut.clicked.connect(return_to_login)
+mainWindow.button_send.clicked.connect(send_message)
 errorWindow.pushButton.clicked.connect(return_to_login_from_error)
 createChatRoom.button_returnButton.clicked.connect(createChatRoom_to_mainWindow)
 createChatRoom.button_createButton.clicked.connect(CreateChatRoom)
+mainWindow.button_Admin.clicked.connect(adminView)
+mainWindowAdmin.button_createChatRoom.clicked.connect(mainWindow_to_createChatRoom)
+mainWindowAdmin.button_logOut.clicked.connect(return_to_login)
+mainWindow.button_send.clicked.connect(send_message)    
+
+
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
