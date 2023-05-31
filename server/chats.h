@@ -65,6 +65,24 @@ void getchats(dir) char *dir;
     }
 }
 
+void registerUser(dir) char *dir;
+{
+    FILE *usersFile;
+   char users [1000];
+    
+    char* target = strdup(dir);
+
+    usersFile = fopen("credentials.txt", "a");
+    fprintf(usersFile,"\n%s",target);
+    fclose(usersFile);
+
+    strcpy(target,"Register succesful!");/*
+    strcat(target,"|");
+    strcat(target,groupName);
+    strcat(target,"|Added");*/
+    strcpy(dir, target);   
+}
+
 void getuserchats(dir) char *dir;
 {
     FILE *fp;

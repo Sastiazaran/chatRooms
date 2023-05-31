@@ -90,6 +90,10 @@ char *dir;
     {
         return 11;
     }
+    else if(strcmp(serv, "registrarUsuario" == 0))
+    {
+        return 12;
+    }
     
     
 

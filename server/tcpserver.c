@@ -157,6 +157,9 @@ int main(){
 			case 11:
 				messageSent(dir);
 				break;
+			case 12:
+				registerUser(dir);
+				break;
 		}
 
 		/* Encriptación mensaje */
