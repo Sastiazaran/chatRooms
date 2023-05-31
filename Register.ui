@@ -117,7 +117,7 @@ color: red;</string>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>210</x>
      <y>360</y>
      <width>77</width>
      <height>41</height>
@@ -139,7 +139,7 @@ background-color: rgb(191, 196, 220);</string>
   <widget class="QPushButton" name="pushButton_2">
    <property name="geometry">
     <rect>
-     <x>110</x>
+     <x>130</x>
      <y>300</y>
      <width>81</width>
      <height>41</height>
@@ -181,11 +181,14 @@ color: rgb(239, 239, 239);</string>
    <property name="text">
     <string>Chatbook</string>
    </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
   </widget>
   <widget class="QPushButton" name="pushButton_3">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>290</x>
      <y>300</y>
      <width>77</width>
      <height>41</height>

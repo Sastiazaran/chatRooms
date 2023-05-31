@@ -95,7 +95,7 @@ background-color: rgb(191, 196, 220);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>511</width>
+     <width>531</width>
      <height>101</height>
     </rect>
    </property>
@@ -115,6 +115,9 @@ color: rgb(239, 239, 239);</string>
    </property>
    <property name="text">
     <string>Chatbook</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
  </widget>

@@ -190,7 +190,7 @@ color: red;</string>
   <widget class="QPushButton" name="button_createButton">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>270</x>
      <y>290</y>
      <width>91</width>
      <height>41</height>
