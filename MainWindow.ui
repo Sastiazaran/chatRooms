@@ -20,40 +20,47 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">background-color: rgb(66, 103, 178);
+color: rgb(239, 239, 239);</string>
   </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>0</y>
-     <width>347</width>
-     <height>77</height>
+     <y>10</y>
+     <width>241</width>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <family>Consolas</family>
+     <family>Harlow Solid Italic</family>
      <pointsize>36</pointsize>
+     <italic>true</italic>
     </font>
    </property>
    <property name="text">
-    <string>Chat rooms</string>
+    <string>Chatbook</string>
    </property>
   </widget>
   <widget class="QPushButton" name="button_logOut">
    <property name="geometry">
     <rect>
      <x>340</x>
-     <y>30</y>
+     <y>20</y>
      <width>99</width>
-     <height>23</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Consolas</family>
     </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-radius:20px;
+color: rgb(0, 0, 0);
+background-color: rgb(191, 196, 220);</string>
    </property>
    <property name="text">
     <string>Log out</string>
@@ -68,8 +75,16 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(0, 0, 0);</string>
+   </property>
    <property name="text">
-    <string>welcome user</string>
+    <string>Welcome user</string>
    </property>
   </widget>
   <widget class="QWidget" name="widget" native="true">
@@ -90,6 +105,16 @@
       <height>71</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius:20px;
+color: rgb(0, 0, 0);
+background-color: rgb(191, 196, 220);</string>
+    </property>
     <property name="text">
      <string>Send</string>
     </property>
@@ -102,6 +127,14 @@
       <width>49</width>
       <height>16</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 0, 0);</string>
     </property>
     <property name="text">
      <string>Chat</string>
@@ -116,6 +149,10 @@
       <height>271</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+    </property>
    </widget>
    <widget class="QTextEdit" name="msgEdit">
     <property name="geometry">
@@ -125,6 +162,10 @@
       <width>161</width>
       <height>71</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
     </property>
    </widget>
   </widget>
@@ -136,6 +177,14 @@
      <width>201</width>
      <height>131</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(0, 0, 0)</string>
    </property>
    <property name="title">
     <string>Users</string>
@@ -179,10 +228,20 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>430</y>
+     <y>420</y>
      <width>121</width>
-     <height>24</height>
+     <height>41</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-radius:20px;
+color: rgb(0, 0, 0);
+background-color: rgb(191, 196, 220);</string>
    </property>
    <property name="text">
     <string>Create chatroom</string>
@@ -197,8 +256,11 @@
      <height>181</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(0, 0, 0);</string>
+   </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -212,6 +274,11 @@
        <width>191</width>
        <height>131</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Calibri</family>
+      </font>
      </property>
      <property name="title">
       <string>Your chatrooms</string>

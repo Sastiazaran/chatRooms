@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(66, 103, 178);
+color: rgb(239, 239, 239);</string>
+  </property>
   <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
@@ -40,7 +44,7 @@
      <widget class="QLabel" name="label_2">
       <property name="font">
        <font>
-        <family>Consolas</family>
+        <family>Calibri</family>
         <pointsize>12</pointsize>
        </font>
       </property>
@@ -63,31 +67,21 @@
      </spacer>
     </item>
     <item row="2" column="1">
-     <widget class="QLineEdit" name="lineEdit"/>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+      </property>
+     </widget>
     </item>
     <item row="3" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QPushButton" name="button_createButton">
-        <property name="text">
-         <string>Create</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="button_returnButton">
-        <property name="text">
-         <string>Return</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <layout class="QHBoxLayout" name="horizontalLayout_2"/>
     </item>
     <item row="2" column="0">
      <widget class="QLabel" name="label_3">
       <property name="font">
        <font>
-        <family>Consolas</family>
+        <family>Calibri</family>
        </font>
       </property>
       <property name="text">
@@ -164,12 +158,13 @@
      <widget class="QLabel" name="label">
       <property name="font">
        <font>
-        <family>Consolas</family>
+        <family>Harlow Solid Italic</family>
         <pointsize>36</pointsize>
+        <italic>true</italic>
        </font>
       </property>
       <property name="text">
-       <string>Chat rooms</string>
+       <string>Chatbook</string>
       </property>
      </widget>
     </item>
@@ -190,6 +185,52 @@ color: red;</string>
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_createButton">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>250</y>
+     <width>91</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-radius:20px;
+color: rgb(0, 0, 0);
+background-color: rgb(191, 196, 220);</string>
+   </property>
+   <property name="text">
+    <string>Create</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_returnButton">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>250</y>
+     <width>91</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Calibri</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-radius:20px;
+background-color: rgb(191, 196, 220);
+color: rgb(0, 0, 0);</string>
+   </property>
+   <property name="text">
+    <string>Return</string>
    </property>
   </widget>
  </widget>

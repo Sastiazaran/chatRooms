@@ -17,6 +17,11 @@ from PyQt5.QtWidgets import (
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 5000  # The port used by the server
 
+#lists
+
+users = []
+chatrooms = []
+
 app = QtWidgets.QApplication([])
 
 loginWindow = uic.loadUi("Login.ui")
