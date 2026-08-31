@@ -1,6 +1,10 @@
+"""Prototype PyQt login window. The supported client is chatRooms.py."""
+
 import sys
-import utilities
 import socket
+
+import utilities
+
 from PyQt5.QtWidgets import (
     QMainWindow,
     QApplication,
