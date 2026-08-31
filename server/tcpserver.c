@@ -1,184 +1,202 @@
 /*
-
-   Lectura remota de una palabra para devolver el numero de vocales usando sockets pertenecientes
-   a la familia TCP, en modo conexion.
-   Codigo del servidor
-
-   Nombre Archivo: tcpserver.c
-   Archivos relacionados: num_vocales.h tcpclient.c 
-   Fecha: Febrero 2023
-
-   Compilacion: cc tcpserver.c -lnsl -o tcpserver
-   Ejecución: ./tcpserver
-*/
+ * Chatbook TCP server
+ *
+ * Multi-client chat-room server using fork() and a simple XOR-obfuscated
+ * pipe-delimited protocol. Educational project for distributed computing.
+ *
+ * Build:    make -C server
+ * Run:      ./server/tcpserver [port]
+ * Default port: 5000
+ */
 
 #include <stdio.h>
-/* The following headers was required in old or some compilers*/
-//#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
 #include <netdb.h>
-#include <signal.h>	// it is required to call signal handler functions
-#include <unistd.h>  // it is required to close the socket descriptor
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <signal.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include <errno.h>
+#include <arpa/inet.h>
+
 #include "authentication.h"
 #include "chats.h"
-//#include "utilities.h"
 
+#define DIRSIZE 65536
+#define DEFAULT_PORT 5000
 
-#define  DIRSIZE   2048      /* longitud maxima parametro entrada/salida */
-#define  PUERTO    5000	     /* numero puerto arbitrario */
+int sd = -1;
+int sd_actual = -1;
 
-int                  sd, sd_actual;  /* descriptores de sockets */
-int                  addrlen;        /* longitud direcciones */
-struct sockaddr_in   sind, pin;      /* direcciones sockets cliente u servidor */
-
-
-/*  procedimiento de aborte del servidor, si llega una senal SIGINT */
-/* ( <ctrl> <c> ) se cierra el socket y se aborta el programa       */
-void aborta_handler(int sig){
-   printf("....abortando el proceso servidor %d\n",sig);
-   close(sd);  
-   close(sd_actual); 
-   exit(1);
+void aborta_handler(int sig)
+{
+    printf("\nShutting down Chatbook server (%d)\n", sig);
+    if (sd_actual != -1) {
+        close(sd_actual);
+    }
+    if (sd != -1) {
+        close(sd);
+    }
+    exit(0);
 }
 
+static void dispatch(int eventInt, char *dir)
+{
+    switch (eventInt) {
+    case 1:
+        auth(dir);
+        break;
+    case 2:
+        creargrupo(dir);
+        break;
+    case 3:
+        getusers(dir);
+        break;
+    case 4:
+        getuserchats(dir);
+        break;
+    case 5:
+        getchats(dir);
+        break;
+    case 6:
+        creargrupo(dir);
+        break;
+    case 7:
+        getadminchats(dir);
+        break;
+    case 8:
+        addUser(dir);
+        break;
+    case 9:
+        deleteUser(dir);
+        break;
+    case 10:
+        getchat(dir);
+        break;
+    case 11:
+        messageSent(dir);
+        break;
+    case 12:
+        registerUser(dir);
+        break;
+    case 13:
+        getchatusers(dir);
+        break;
+    default:
+        strcpy(dir, "Error|Unknown command");
+        break;
+    }
+}
 
-int main(){
-  
-	char  dir[DIRSIZE];	     /* parametro entrada y salida */
+int main(int argc, char *argv[])
+{
+    int port = DEFAULT_PORT;
+    if (argc > 1) {
+        port = atoi(argv[1]);
+        if (port <= 0 || port > 65535) {
+            fprintf(stderr, "Invalid port: %s\n", argv[1]);
+            return 1;
+        }
+    }
 
-	/*
-	When the user presses <Ctrl + C>, the aborta_handler function will be called, 
-	and such a message will be printed. 
-	Note that the signal function returns SIG_ERR if it is unable to set the 
-	signal handler, executing line 54.
-	*/	
-   if(signal(SIGINT, aborta_handler) == SIG_ERR){
-   	perror("Could not set signal handler");
-      return 1;
-   }
-       //signal(SIGINT, aborta);      /* activando la senal SIGINT */
+    if (signal(SIGINT, aborta_handler) == SIG_ERR) {
+        perror("Could not set signal handler");
+        return 1;
+    }
+    signal(SIGCHLD, SIG_IGN); /* avoid zombie children */
 
-/* obtencion de un socket tipo internet */
-	if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		perror("socket");
-		exit(1);
-	}
+    if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        return 1;
+    }
 
-/* asignar direcciones en la estructura de direcciones */
-	sind.sin_family = AF_INET;
-	sind.sin_addr.s_addr = INADDR_ANY;   /* INADDR_ANY=0x000000 = yo mismo */
-	sind.sin_port = htons(PUERTO);       /*  convirtiendo a formato red */
+    int opt = 1;
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+        perror("setsockopt");
+    }
 
-/* asociando el socket al numero de puerto */
-	if (bind(sd, (struct sockaddr *)&sind, sizeof(sind)) == -1) {
-		perror("bind");
-		exit(1);
-	}
+    struct sockaddr_in sind;
+    memset(&sind, 0, sizeof(sind));
+    sind.sin_family = AF_INET;
+    sind.sin_addr.s_addr = INADDR_ANY;
+    sind.sin_port = htons((uint16_t)port);
 
-/* ponerse a escuchar a traves del socket */
-	if (listen(sd, 5) == -1) {
-		perror("listen");
-		exit(1);
-	}
+    if (bind(sd, (struct sockaddr *)&sind, sizeof(sind)) == -1) {
+        perror("bind");
+        close(sd);
+        return 1;
+    }
 
-	int max = 100000;
-	pid_t child_pid;
-	for (int i = 0; i < max; ++i)
-	{
-	/* esperando que un cliente solicite un servicio */
-		if ((sd_actual = accept(sd, (struct sockaddr *)&pin, &addrlen)) == -1) {
-			perror("accept");
-			exit(1);
-		}
+    if (listen(sd, 16) == -1) {
+        perror("listen");
+        close(sd);
+        return 1;
+    }
 
-		child_pid = fork();
-		if (child_pid==0)
-		{
-			break; //is child
-		} else {
-			close(sd_actual); //is parent
-		}
-	}
+    printf("Chatbook server listening on port %d\n", port);
 
-	if (child_pid==0)
-	{
-		bool whil = true;
-	while(whil){
+    for (;;) {
+        struct sockaddr_in pin;
+        socklen_t addrlen = sizeof(pin);
+        sd_actual = accept(sd, (struct sockaddr *)&pin, &addrlen);
+        if (sd_actual == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
+            perror("accept");
+            close(sd);
+            return 1;
+        }
 
-	/* tomar un mensaje del cliente */
-		if (recv(sd_actual, dir, sizeof(dir), 0) == -1) {
-			perror("recv");
-			exit(1);
-		}
+        pid_t child_pid = fork();
+        if (child_pid == 0) {
+            close(sd);
+            break;
+        }
+        if (child_pid < 0) {
+            perror("fork");
+            close(sd_actual);
+            continue;
+        }
+        close(sd_actual);
+        sd_actual = -1;
+    }
 
-		/*IMPRIME EL MENSAJE A DESCIFRAR*/
-		cypher(dir);
-		printf("Deciphered: %s\n", dir);
+    char dir[DIRSIZE];
+    for (;;) {
+        memset(dir, 0, sizeof(dir));
+        ssize_t n = recv(sd_actual, dir, sizeof(dir) - 1, 0);
+        if (n <= 0) {
+            break;
+        }
+        dir[n] = '\0';
 
-	/* leyendo el directorio */
-		//num_vocales(dir);
-		int eventInt = event(dir);
-		printf("\nEvent:%d\n",eventInt);
-		switch(eventInt){
-			case 1:
-				auth(dir);
-				break;
-			case 2:
-				creargrupo(dir);
-				whil = false;
-				break;
-			case 3:
-				getusers(dir);
-				break;
-			case 4:
-				getuserchats(dir);
-				break;
-			case 5:
-				getchats(dir);
-				break;
-			case 6:
-				creargrupo(dir);
-				break;
-			case 7:
-				getadminchats(dir);
-				break;
-			case 8:
-				addUser(dir);
-				break;
-			case 9:
-				deleteUser(dir);
-				break;
-			case 10:
-				getchat(dir);
-				break;
-			case 11:
-				messageSent(dir);
-				break;
-			case 12:
-				registerUser(dir);
-				break;
-		}
-		printf("Sending...: %s\n", dir);
-		/* Encriptación mensaje */
-		cypher(dir);
-		
+        cypher(dir, (size_t)n);
+        printf("Request: %s\n", dir);
 
-	/* enviando la respuesta del servicio */
-		if ( send(sd_actual, dir, strlen(dir), 0) == -1) {
-			perror("send");
-			exit(1);
-		}
-	}
+        int eventInt = event(dir);
+        printf("Event: %d\n", eventInt);
+        dispatch(eventInt, dir);
 
-	/* cerrar los dos sockets */
-	close(sd_actual);  
-	close(sd);
-	printf("Conexion cerrada\n");
-	} else {
-		close(sd);
-	}
-	return 0;
+        printf("Response: %s\n", dir);
+        size_t out_len = strlen(dir);
+        if (out_len == 0) {
+            dir[0] = ' ';
+            dir[1] = '\0';
+            out_len = 1;
+        }
+        cypher(dir, out_len);
+
+        if (send(sd_actual, dir, out_len, 0) == -1) {
+            perror("send");
+            break;
+        }
+    }
+
+    close(sd_actual);
+    printf("Connection closed\n");
+    return 0;
 }

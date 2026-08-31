@@ -1,0 +1,10 @@
+env/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+server/tcpserver
+server/*.o
+.DS_Store

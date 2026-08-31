@@ -1,82 +1,113 @@
-#include <stdlib.h> 
+#ifndef CHATBOOK_AUTHENTICATION_H
+#define CHATBOOK_AUTHENTICATION_H
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include "utilities.h"
 
-
-char *itoa(int n)
+static int is_comment_or_empty(const char *line)
 {
-  static char   buf[32];
-  sprintf(buf,"%d ",n);
-  return  buf;
+    return !line || line[0] == '\0' || line[0] == '#';
 }
 
-void auth(dir)
-  char *dir;
+static void auth(char *dir)
 {
-    FILE *fp;
-    char *line = 0;
-    size_t len = 0;
-    ssize_t read;
-    int result;
-
-    printf("\nPalabra descifrada %s \n", dir);
-
-    fp = fopen("credentials.txt", "r");
+    FILE *fp = fopen("credentials.txt", "r");
     if (fp == NULL) {
+        strcpy(dir, "Denied\n");
         return;
     }
 
-    while ((read = getline(&line, &len, fp)) != -1) {        
-        line[strlen(line)-2] = '\0';
-        result = strcmp(dir,line);
-        if (result == 0) {          
-            strcpy(dir,"Granted\n");
+    trim_inplace(dir);
+
+    char *line = NULL;
+    size_t len = 0;
+    while (getline(&line, &len, fp) != -1) {
+        trim_inplace(line);
+        if (is_comment_or_empty(line) || (line[0] == '/' && line[1] == '/')) {
+            continue;
+        }
+        if (strcmp(dir, line) == 0) {
+            strcpy(dir, "Granted\n");
+            free(line);
+            fclose(fp);
             return;
         }
     }
     free(line);
-    strcpy(dir,"Denied\n");
+    fclose(fp);
+    strcpy(dir, "Denied\n");
 }
 
-void getusers(dir) char *dir;
+static void getusers(char *dir)
 {
-    FILE *fp;
-    char *line = 0;
-    size_t len = 0;
-    ssize_t read;
-    int line_len;
-    char pch[1000];
-    int j = 0;
-    char it;
-
-    fp = fopen("credentials.txt", "r");
-    if (fp == NULL)
-    {
+    FILE *fp = fopen("credentials.txt", "r");
+    if (fp == NULL) {
+        strcpy(dir, "");
         return;
     }
 
-    int skip = 0;
-    while ((read = getline(&line, &len, fp)) != -1)
-    {
-        if (skip == 0)
-        {
-            skip++;
+    char *line = NULL;
+    size_t len = 0;
+    char out[4096] = "";
+    int first = 1;
+
+    while (getline(&line, &len, fp) != -1) {
+        trim_inplace(line);
+        if (is_comment_or_empty(line) || (line[0] == '/' && line[1] == '/')) {
             continue;
         }
-        line_len = strlen(line);
-        for (int i = 0; i < line_len; i++)
-        {
-            pch[j] = line[i];
-            if (line[i] == '|')
-            {
-                i = line_len;
-            }
-            j++;
+        char *pipe = strchr(line, '|');
+        if (pipe) {
+            *pipe = '\0';
         }
+        trim_inplace(line);
+        if (line[0] == '\0') {
+            continue;
+        }
+        if (!first) {
+            strcat(out, "|");
+        }
+        strncat(out, line, sizeof(out) - strlen(out) - 1);
+        first = 0;
     }
-    pch[j-1] = '\0';
-    strcpy(dir, pch);
-    strcat(dir, "\0");
-    return;
+
+    free(line);
+    fclose(fp);
+    strcpy(dir, out);
 }
 
+static int user_exists(const char *username)
+{
+    FILE *fp = fopen("credentials.txt", "r");
+    if (fp == NULL) {
+        return 0;
+    }
+
+    char *line = NULL;
+    size_t len = 0;
+    int found = 0;
+    while (getline(&line, &len, fp) != -1) {
+        trim_inplace(line);
+        if (is_comment_or_empty(line) || (line[0] == '/' && line[1] == '/')) {
+            continue;
+        }
+        char copy[512];
+        strncpy(copy, line, sizeof(copy) - 1);
+        copy[sizeof(copy) - 1] = '\0';
+        char *pipe = strchr(copy, '|');
+        if (pipe) {
+            *pipe = '\0';
+        }
+        if (strcmp(copy, username) == 0) {
+            found = 1;
+            break;
+        }
+    }
+    free(line);
+    fclose(fp);
+    return found;
+}
+
+#endif /* CHATBOOK_AUTHENTICATION_H */
